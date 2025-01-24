@@ -84,7 +84,7 @@ def display_pokemon_list(poke_list):
         print("There are no pokemons in this Pokedex.\n")
         return
     for pokemon in poke_list:
-        print(f"ID: {pokemon['ID']}, Name: {pokemon['Name']}, Type: {pokemon['Type']}, HP: {pokemon['HP']}, Attack: {pokemon['Attack']}, Can Evolve: {'TRUE' if pokemon['Can Evolve'] else 'FALSE'}\n")
+        print(f"ID: {pokemon['ID']}, Name: {pokemon['Name']}, Type: {pokemon['Type']}, HP: {pokemon['HP']}, Attack: {pokemon['Attack']}, Can Evolve: {'TRUE' if pokemon['Can Evolve'] else 'FALSE'}")
     pass
 
 
@@ -229,6 +229,19 @@ def release_pokemon_by_name(owner_node):
     """
     Prompt user for a Pokemon name, remove it from this owner's pokedex if found.
     """
+    if owner_node is None:
+        print("No existing owners.\n")
+        return
+    if owner_node['pokedex'] is None:
+        print("No existing pokemons.\n")
+        return
+    name = input("Enter Pokemon Name to release: ")
+    for i in owner_node['pokedex']:
+        if name.lower() in i['Name'].lower():
+            owner_node['pokedex'].remove(i)
+            print(f"Releasing {i['Name']} from {owner_node['owner']}.\n")
+            return
+    print(f"No Pokemon named '{name}' in {owner_node['owner']}'s Pokedex.\n")
     pass
 
 def evolve_pokemon_by_name(owner_node):
@@ -239,6 +252,27 @@ def evolve_pokemon_by_name(owner_node):
     3) Insert new
     4) If new is a duplicate, remove it immediately
     """
+    if owner_node is None:
+        print("No existing owners.\n")
+        return
+    if owner_node['pokedex'] is None:
+        print("No existing pokemons.\n")
+        return
+    name = input("Enter Pokemon Name to evolve: ")
+    for i in owner_node['pokedex']:
+        if name.lower() in i['Name'].lower():
+            if i['Can Evolve'] == 'FALSE':
+                print(f"Pokemon {i['Name']} cannot evolve.\n")
+                return
+            else:
+                owner_node['pokedex'].remove(i)
+                id = get_poke_dict_by_id(i['ID'])
+                print(f"Pokemon evolved from{i['Name']} (ID {i['ID']}) to {id['Name']} (ID {id['ID']}).")
+                for i in owner_node['pokedex']:
+                    if i == id:
+                        owner_node['pokedex'].remove(i)
+                        print(f"{i['Name']} was already present; releasing it immediately.\n")
+                owner_node['pokedex'].append(id)
     pass
 
 
@@ -296,7 +330,7 @@ def print_pokemon_type(node):
         return
     for i in node['pokedex']:
         if i['Type'].lower() == pokemon_type.lower():
-            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}\n")
+            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
 
 def print_evolvable(node):
     pokedex = node['pokedex']
@@ -306,7 +340,7 @@ def print_evolvable(node):
         return
     for i in node['pokedex']:
         if i['Can Evolve'] == 'TRUE':
-            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}\n")
+            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
 
 def print_attack_above(node):
     attack = read_int_safe("Enter Attack threshold: ")
@@ -317,7 +351,7 @@ def print_attack_above(node):
         return
     for i in node['pokedex']:
         if i['Attack'] >= attack:
-            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}\n")
+            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
 
 def print_hp_above(node):
     hp = read_int_safe("Enter HP threshold: ")
@@ -328,7 +362,7 @@ def print_hp_above(node):
         return
     for i in node['pokedex']:
         if i['HP'] >= hp:
-            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}\n")
+            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
 
 def print_names(node):
     name = input("Starting letter(s): ")
@@ -339,7 +373,7 @@ def print_names(node):
         return
     for i in node['pokedex']:
         if i['Name'].lower().startswith(name.lower()) :
-            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}\n")
+            print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
 
 ########################
 # 7) The Display Filter Sub-Menu
@@ -350,7 +384,7 @@ def display_filter_sub_menu(owner_node):
         print("No existing pokemons.\n")
         return
     while True:
-        print('-- Display Filter Menu --\n')
+        print('-- Display Filter Menu --')
         print('1. Only a certain type\n'
               '2. Only Evolvable\n'
               '3. Only Attack above __\n'
@@ -377,6 +411,8 @@ def display_filter_sub_menu(owner_node):
             display_pokemon_list(owner_node['pokedex'])
         elif key == 7:
             break
+        else:
+            print("Invalid choice.")
     pass
 
 
@@ -392,7 +428,7 @@ def existing_pokedex():
         print("No such owner")
         return
     while True:
-        print("-- "+root["owner"]+"'s Pokedex Menu --\n")
+        print("-- "+root["owner"]+"'s Pokedex Menu --")
         print('1. Add Pokemon\n'
               '2. Display Pokedex\n'
               '3. Release Pokemon\n'
@@ -404,6 +440,10 @@ def existing_pokedex():
             continue
         elif key == 2:
             display_filter_sub_menu(root)
+        elif key == 3:
+            release_pokemon_by_name(root)
+        elif key == 4:
+            evolve_pokemon_by_name(root)
         elif key == 5:
             break
     pass
@@ -427,8 +467,11 @@ def main():
         if key == 1:
             new_pokedex()
             continue
-        if key == 2:
+        elif key == 2:
             existing_pokedex()
+            continue
+        elif key == 3:
+
         elif key == 6:
             break
     print("Goodbye!\n")
