@@ -149,24 +149,56 @@ def find_owner_bst(root, owner_name):
     """
     if not root:
         return None
-    if root["owner"].lower() == owner_name.lower():
+    if root['owner'].lower() == owner_name.lower():
         return root
-    elif root["owner"].lower() > owner_name.lower():
-        return find_owner_bst(root["left"], owner_name)
+    elif root['owner'].lower() > owner_name.lower():
+        return find_owner_bst(root['left'], owner_name)
     else:
-        return find_owner_bst(root["right"], owner_name)
+        return find_owner_bst(root['right'], owner_name)
 
 def min_node(node):
     """
     Return the leftmost node in a BST subtree.
     """
+    while node["left"] is not None:
+        node = node["left"]
+    return node
+
+def delete_owner():
+    name = input("Enter owner to delete: ")
+    global ownerRoot
+    if not ownerRoot:
+        print("No existing owners.\n")
+        return
+    root = find_owner_bst(ownerRoot, name)
+    if root is None:
+        print(f"Owner '{name}' not found.")
+        return
+    print(f"Deleting {root['owner']}'s entire Pokedex...")
+    ownerRoot = delete_owner_bst(ownerRoot, name)
+    print("Pokedex deleted.")
     pass
 
 def delete_owner_bst(root, owner_name):
     """
     Remove a node from the BST by owner_name. Return updated root.
     """
-    pass
+    if not root:
+        return None
+    if root['owner'].lower() > owner_name.lower():
+        root['left'] = delete_owner_bst(root['left'], owner_name)
+    elif root['owner'].lower() < owner_name.lower():
+        root['right'] = delete_owner_bst(root['right'], owner_name)
+    else:
+        if root["left"] is None:
+            return root['right']
+        elif root["right"] is None:
+            return root['left']
+        else:
+            temp = min_node(root)
+            root['owner'], root['pokedex'] = temp["owner"], temp["pokedex"]
+            root['right'] = delete_owner_bst(root['right'], temp["owner"])
+    return root
 
 
 ########################
@@ -203,9 +235,6 @@ def post_order(root):
 ########################
 
 def add_pokemon_to_owner(owner_node):
-    if owner_node is None:
-        print("No existing owners.\n")
-        return
     while True:
         id = read_int_safe("Enter pokemon ID to add: ")
         id = get_poke_dict_by_id(id - 1)
@@ -229,9 +258,6 @@ def release_pokemon_by_name(owner_node):
     """
     Prompt user for a Pokemon name, remove it from this owner's pokedex if found.
     """
-    if owner_node is None:
-        print("No existing owners.\n")
-        return
     if owner_node['pokedex'] is None:
         print("No existing pokemons.\n")
         return
@@ -252,9 +278,6 @@ def evolve_pokemon_by_name(owner_node):
     3) Insert new
     4) If new is a duplicate, remove it immediately
     """
-    if owner_node is None:
-        print("No existing owners.\n")
-        return
     if owner_node['pokedex'] is None:
         print("No existing pokemons.\n")
         return
@@ -273,7 +296,6 @@ def evolve_pokemon_by_name(owner_node):
                         owner_node['pokedex'].remove(i)
                         print(f"{i['Name']} was already present; releasing it immediately.\n")
                 owner_node['pokedex'].append(id)
-    pass
 
 
 ########################
@@ -284,13 +306,28 @@ def gather_all_owners(root, arr):
     """
     Collect all BST nodes into a list (arr).
     """
+    if root is None:
+        return
+    arr.append(root)
+    gather_all_owners(root['left'], arr)
+    gather_all_owners(root['right'], arr)
     pass
 
 def sort_owners_by_num_pokemon():
-    """
-    Gather owners, sort them by (#pokedex size, then alpha), print results.
-    """
-    pass
+    global ownerRoot
+    if not ownerRoot:
+        print("No owners at all.\n")
+        return
+    owner_list = []
+    gather_all_owners(ownerRoot, owner_list)
+    owner_list.sort()
+    owner_list.sort(key = lambda owner_node: owner_node['pokedex'])
+    print("=== The Owners we have, sorted by number of Pokemons ===")
+    for i in owner_list:
+        print(f"Owner: {i['owner']} (has {num_of_pokemons(i["pokedex"])} Pokemon)")
+
+def num_of_pokemons(pokedex):
+    return len(pokedex)
 
 
 ########################
@@ -380,7 +417,7 @@ def print_names(node):
 ########################
 
 def display_filter_sub_menu(owner_node):
-    if owner_node['pokedex'] is None:
+    if not owner_node['pokedex']:
         print("No existing pokemons.\n")
         return
     while True:
@@ -422,6 +459,9 @@ def display_filter_sub_menu(owner_node):
 
 def existing_pokedex():
     global ownerRoot
+    if not ownerRoot:
+        print("No existing owners.\n")
+        return
     name = input("Owner name: ")
     root = find_owner_bst(ownerRoot, name)
     if root is None:
@@ -471,7 +511,11 @@ def main():
             existing_pokedex()
             continue
         elif key == 3:
-
+            delete_owner()
+            continue
+        elif key == 4:
+            sort_owners_by_num_pokemon()
+            continue
         elif key == 6:
             break
     print("Goodbye!\n")
