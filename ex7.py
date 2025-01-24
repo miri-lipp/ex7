@@ -320,8 +320,9 @@ def sort_owners_by_num_pokemon():
         return
     owner_list = []
     gather_all_owners(ownerRoot, owner_list)
-    owner_list.sort()
-    owner_list.sort(key = lambda owner_node: owner_node['pokedex'])
+    ##owner_list.sort() need to sort it alphabetically
+    owner_list.sort(key=lambda owner_node: owner_node['owner'].lower())
+    owner_list.sort(key = lambda owner_node: len(owner_node['pokedex']))
     print("=== The Owners we have, sorted by number of Pokemons ===")
     for i in owner_list:
         print(f"Owner: {i['owner']} (has {num_of_pokemons(i["pokedex"])} Pokemon)")
@@ -338,7 +339,25 @@ def print_all_owners():
     """
     Let user pick BFS, Pre, In, or Post. Print each owner's data/pokedex accordingly.
     """
-    pass
+    global ownerRoot
+    if not ownerRoot:
+        print("No existing owners.\n")
+        return
+    print('1) BFS\n'
+          '2) Pre-Order\n'
+          '3) In-Order\n'
+          '4) Post-Order\n')
+    key = read_int_safe("Your choice: ")
+    if key == 1:
+        bfs_traversal(ownerRoot)
+    elif key == 2:
+        pre_order_print(ownerRoot)
+    elif key == 3:
+        in_order_print(ownerRoot)
+    elif key == 4:
+        post_order_print(ownerRoot)
+    else:
+        print("Invalid choice.")
 
 def pre_order_print(node):
     """
@@ -516,8 +535,13 @@ def main():
         elif key == 4:
             sort_owners_by_num_pokemon()
             continue
+        elif key == 5:
+            print_all_owners()
+            continue
         elif key == 6:
             break
+        else:
+            print("Invalid choice.")
     print("Goodbye!\n")
     pass
 
