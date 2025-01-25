@@ -1,4 +1,10 @@
+##############################
+#Name: Miriam Lipkovich
+#exercise: ex7
+#ID: 336239652
+################################
 import csv
+#####################from pokedex_gui import show_Pokedex_GUI
 from unittest import case
 
 # Global BST root
@@ -52,11 +58,10 @@ def read_int_safe(prompt):
     Prompt the user for an integer, re-prompting on invalid input.
     """
     while True:
-        try:
-            x = input("Your choice:")
+        x = input("Your choice:")
+        if x.isdigit():
             return int(x)
-        except ValueError:
-            print("Invalid input.")
+        print("Invalid input.")
 
 def get_poke_dict_by_id(poke_id):
     """
@@ -80,7 +85,7 @@ def display_pokemon_list(poke_list):
     """
     Display a list of Pokemon dicts, or a message if empty.
     """
-    if poke_list is None:
+    if not poke_list:
         print("There are no pokemons in this Pokedex.\n")
         return
     for pokemon in poke_list:
@@ -209,24 +214,47 @@ def bfs_traversal(root):
     """
     BFS level-order traversal. Print each owner's name and # of pokemons.
     """
+    owner_list = []
+    gather_all_owners(root, owner_list)
+    for i in owner_list:
+        print(f"Owner: {i['owner']}")
+        display_pokemon_list(i["pokedex"])
     pass
 
 def pre_order(root):
     """
     Pre-order traversal (root -> left -> right). Print data for each node.
     """
+    if root is None:
+        return
+    print(f"Owner: {root['owner']}")
+    display_pokemon_list(root['pokedex'])
+    pre_order(root["left"])
+    pre_order(root["right"])
     pass
 
 def in_order(root):
     """
     In-order traversal (left -> root -> right). Print data for each node.
     """
+    if root is None:
+        return
+    in_order(root["left"])
+    print(f"Owner: {root['owner']}")
+    display_pokemon_list(root["pokedex"])
+    in_order(root["right"])
     pass
 
 def post_order(root):
     """
     Post-order traversal (left -> right -> root). Print data for each node.
     """
+    if root is None:
+        return
+    post_order(root["left"])
+    post_order(root["right"])
+    print(f"Owner: {root['owner']}")
+    display_pokemon_list(root["pokedex"])
     pass
 
 
@@ -258,7 +286,7 @@ def release_pokemon_by_name(owner_node):
     """
     Prompt user for a Pokemon name, remove it from this owner's pokedex if found.
     """
-    if owner_node['pokedex'] is None:
+    if not owner_node['pokedex']:
         print("No existing pokemons.\n")
         return
     name = input("Enter Pokemon Name to release: ")
@@ -278,7 +306,7 @@ def evolve_pokemon_by_name(owner_node):
     3) Insert new
     4) If new is a duplicate, remove it immediately
     """
-    if owner_node['pokedex'] is None:
+    if not owner_node['pokedex']:
         print("No existing pokemons.\n")
         return
     name = input("Enter Pokemon Name to evolve: ")
@@ -363,18 +391,21 @@ def pre_order_print(node):
     """
     Helper to print data in pre-order.
     """
+    pre_order(node)
     pass
 
 def in_order_print(node):
     """
     Helper to print data in in-order.
     """
+    in_order(node)
     pass
 
 def post_order_print(node):
     """
     Helper to print data in post-order.
     """
+    post_order(node)
     pass
 
 def print_pokemon_type(node):
@@ -503,11 +534,15 @@ def existing_pokedex():
             release_pokemon_by_name(root)
         elif key == 4:
             evolve_pokemon_by_name(root)
+       ## elif key == 5:
+         ##   show_Pokedex_GUI(root['pokedex'])
         elif key == 5:
             break
-    pass
+        else:
+            print("Invalid choice.")
 
 def main_menu():
+    print('=== Main Menu ===')
     print('1. New Pokedex\n'
           '2. Existing Pokedex\n'
           '3. Delete a Pokedex\n'
