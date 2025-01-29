@@ -2,9 +2,9 @@
 #Name: Miriam Lipkovich
 #exercise: ex7
 #ID: 336239652
-################################
+######################
 import csv
-#####################from pokedex_gui import show_Pokedex_GUI
+#####################
 from unittest import case
 
 # Global BST root
@@ -58,7 +58,7 @@ def read_int_safe(prompt):
     Prompt the user for an integer, re-prompting on invalid input.
     """
     while True:
-        x = input("Your choice:")
+        x = input(prompt)
         if x.isdigit():
             return int(x)
         print("Invalid input.")
@@ -69,7 +69,7 @@ def get_poke_dict_by_id(poke_id):
     """
     for pokemon in HOENN_DATA:
         if pokemon['ID'] == poke_id:
-            return HOENN_DATA[poke_id]
+            return pokemon
     return None
 
 def get_poke_dict_by_name(name):
@@ -78,7 +78,7 @@ def get_poke_dict_by_name(name):
     """
     for pokemon in HOENN_DATA:
         if pokemon['name'] == name:
-            return HOENN_DATA[pokemon['name']]
+            return pokemon
     return None
 
 def display_pokemon_list(poke_list):
@@ -260,18 +260,20 @@ def post_order(root):
 ########################
 
 def add_pokemon_to_owner(owner_node):
-    id = read_int_safe("Enter pokemon ID to add: ")
+    id = read_int_safe("Enter Pokemon ID to add: ")
     if id < 0 or id > 135:
-        print(f"ID '{id}' not found in Honen data.\n")
+        print(f"ID {id} not found in Honen data.\n")
         return
-    id = get_poke_dict_by_id(id - 1)
+    new_pokemon = get_poke_dict_by_id(id)
+    if new_pokemon is None:  # Check if the Pokémon exists
+        print(f"ID {id} not found in Hoenn data.\n")
+        return
     for i in owner_node['pokedex']:
-        if i == id:
+        if i == new_pokemon:
             print("Pokemon already in the list. No changes made.\n")
             return
     owner_node["pokedex"].append(id)
-    new_pokemon = id
-    print(f"Pokemon {new_pokemon['Name']} (ID {new_pokemon['ID']}) added to {owner_node['owner']}'s Pokedex.\n")
+    print(f"Pokemon {new_pokemon['Name']} (ID {new_pokemon['ID']}) added to {owner_node['owner']}'s Pokedex.")
     """
     Prompt user for a Pokemon ID, find the data, and add to this owner's pokedex if not duplicate.
     """
@@ -342,7 +344,7 @@ def sort_owners_by_num_pokemon():
     owner_list.sort(key = lambda owner_node: len(owner_node['pokedex']))
     print("=== The Owners we have, sorted by number of Pokemons ===")
     for i in owner_list:
-        print(f"Owner: {i['owner']} (has {num_of_pokemons(i["pokedex"])} Pokemon)")
+        print(f"Owner: {i['owner']} (has {num_of_pokemons(i['pokedex'])} Pokemon)")
 
 def num_of_pokemons(pokedex):
     return len(pokedex)
@@ -364,7 +366,7 @@ def print_all_owners():
           '2) Pre-Order\n'
           '3) In-Order\n'
           '4) Post-Order\n')
-    key = read_int_safe("Your choice: ")
+    key = read_int_safe("Your choice: \n")
     if key == 1:
         bfs_traversal(ownerRoot)
     elif key == 2:
@@ -399,13 +401,13 @@ def post_order_print(node):
 
 def print_pokemon_type(node):
     pokemon_type = input("Which Type? (e.g. GRASS, WATER): ")
-    pokedex = node['pokedex']
-    type_exist = sum(1 for pokemon in pokedex if pokemon['Type'].lower() == pokemon_type)
+    pokedex = node["pokedex"]
+    type_exist = sum(1 for pokemon in pokedex if pokemon["Type"].lower() == pokemon_type)
     if type_exist == 0:
         print("There are no Pokemons in this Pokedex that match the criteria.\n")
         return
-    for i in node['pokedex']:
-        if i['Type'].lower() == pokemon_type.lower():
+    for i in node["pokedex"]:
+        if i["Type"].lower() == pokemon_type.lower():
             print(f"ID: {i['ID']}, Name: {i['Name']}, Type: {i['Type']}, HP: {i['HP']}, Attack: {i['Attack']}, Can Evolve: {'TRUE' if i['Can Evolve'] else 'FALSE'}")
     print('\n')
 
@@ -463,7 +465,7 @@ def print_names(node):
 def display_filter_sub_menu(owner_node):
     while True:
         print('-- Display Filter Menu --')
-        print('1. Only a certain type\n'
+        print('1. Only a certain Type\n'
               '2. Only Evolvable\n'
               '3. Only Attack above __\n'
               '4. Only HP above __\n'
@@ -503,10 +505,10 @@ def existing_pokedex():
     if not ownerRoot:
         print("No owners at all.\n")
         return
-    name = input("Owner name: ")
+    name = input("Owner name: \n")
     root = find_owner_bst(ownerRoot, name)
     if root is None:
-        print(f"Owner {name} not found.\n")
+        print(f"Owner '{name}' not found.\n")
         return
     while True:
         print("-- "+root["owner"]+"'s Pokedex Menu --")
@@ -514,8 +516,8 @@ def existing_pokedex():
               '2. Display Pokedex\n'
               '3. Release Pokemon\n'
               '4. Evolve Pokemon\n'
-              '5. Back to main')
-        key = read_int_safe("Your choice: ")
+              '5. Back to Main')
+        key = read_int_safe("Your choice: \n")
         if key == 1:
             add_pokemon_to_owner(root)
             continue
@@ -537,7 +539,7 @@ def main_menu():
     print('1. New Pokedex\n'
           '2. Existing Pokedex\n'
           '3. Delete a Pokedex\n'
-          '4. Sort owners\n'
+          '4. Display owners by number of Pokemon\n'
           '5. Print All\n'
           '6. Exit')
     pass
